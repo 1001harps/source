@@ -28,4 +28,7 @@ export class Tenant extends BaseEntity {
 
   @UpdateDateColumn()
   modified: Date;
+
+  @Column("boolean", { default: true })
+  active: boolean;
 }

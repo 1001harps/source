@@ -21,5 +21,8 @@ export class File extends BaseEntity {
   @UpdateDateColumn()
   modified: Date;
 
+  @Column("boolean", { default: true })
+  active: boolean;
+
   path = () => `${this.tenantId}/${this.id}.mp3`;
 }

@@ -23,27 +23,3 @@ export const apiKeyMiddleware =
 
     next();
   };
-
-export const requestLoggerMiddleware =
-  ({ logger }: Dependencies) =>
-  (req: Request, res: Response, next: NextFunction) => {
-    res.on("finish", () => {
-      if (res.statusCode >= 400) {
-        logger.error(
-          req.method,
-          decodeURI(req.url),
-          res.statusCode,
-          res.statusMessage
-        );
-      } else {
-        logger.info(
-          req.method,
-          decodeURI(req.url),
-          res.statusCode,
-          res.statusMessage
-        );
-      }
-    });
-
-    next();
-  };

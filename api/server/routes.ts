@@ -2,6 +2,34 @@ import { Request, Response } from "express";
 import { Dependencies } from "../types";
 import { AppLocals, UploadedFile } from "./types";
 
+export const getFileHandler =
+  ({ dataService, storageService }: Dependencies) =>
+  async (req: Request, res: Response) => {
+    const tenantId = res.locals.tenantId;
+    const fileId = req.params.id;
+
+    const file = await dataService.getFile(tenantId, fileId);
+    const url = await storageService.getUrl(file.path);
+
+    file.url = url;
+
+    res.json(file);
+  };
+
+export const deleteFileHandler =
+  ({ dataService }: Dependencies) =>
+  async (req: Request, res: Response) => {
+    console.log("delete file!");
+    const tenantId = res.locals.tenantId;
+    const fileId = req.params.id;
+
+    console.log({ tenantId, fileId });
+    await dataService.setFileInactive(tenantId, fileId);
+
+    res.status(200);
+    res.end();
+  };
+
 export const getFilesHandler =
   ({ dataService, storageService }: Dependencies) =>
   async (req: Request, res: Response) => {
@@ -10,16 +38,19 @@ export const getFilesHandler =
     const files = await dataService.getFiles(tenantId);
 
     const paths = files.map((f) => f.path);
+    if (paths.length === 0) {
+      res.json(files);
+      return;
+    }
 
     const urls = await storageService.getUrls(paths);
 
-    const result = files.map((f) => ({
+    const filesWithUrl = files.map((f) => ({
       ...f,
       url: urls[f.path],
     }));
 
-    res.setHeader("Content-Type", "application/json");
-    res.json(result);
+    res.json(filesWithUrl);
   };
 
 export const putFileHandler =
@@ -42,13 +73,12 @@ export const putFileHandler =
         uploadedFile.data,
         uploadedFile.mimetype
       );
-      logger.debug("uploaded", file.path);
+
+      res.json(file);
     } catch (e) {
       logger.error(e);
       res.sendStatus(500);
-      res.end();
-      return;
     }
-    res.sendStatus(200);
-    return;
+
+    res.end();
   };

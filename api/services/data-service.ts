@@ -15,9 +15,13 @@ const fileMapper = (file: File): FileDto => {
 };
 
 export interface DataService {
+  getFile(tenantId: string, fileId: string): Promise<FileDto>;
+  setFileInactive(tenantId: string, fileId: string): Promise<void>;
+  deleteFile(tenantId: string, fileId: string): Promise<void>;
   getFiles(tenantId: string): Promise<FileDto[]>;
   createFile(tenantId: string): Promise<FileDto>;
   getTenantByApiKey(apiKey: string): Promise<Tenant>;
+  getInactiveFiles(): Promise<File[]>;
 }
 
 export class DbDataService implements DataService {
@@ -31,8 +35,31 @@ export class DbDataService implements DataService {
     this.tenantRepository = dataSource.getRepository(Tenant);
   }
 
+  async getFile(tenantId: string, fileId: string): Promise<FileDto> {
+    const file = await this.fileRepository.findOneBy({
+      tenantId,
+      id: fileId,
+      active: true,
+    });
+    return fileMapper(file);
+  }
+
+  async setFileInactive(tenantId: string, fileId: string): Promise<void> {
+    console.log("setFileInactive", { tenantId, fileId });
+    const file = await this.fileRepository.findOneBy({ tenantId, id: fileId });
+
+    file.active = false;
+
+    await this.fileRepository.save(file);
+    console.log("saved");
+  }
+
+  async deleteFile(tenantId: string, fileId: string): Promise<void> {
+    await this.fileRepository.delete({ tenantId, id: fileId });
+  }
+
   async getFiles(tenantId: string): Promise<FileDto[]> {
-    const files = await this.fileRepository.findBy({ tenantId });
+    const files = await this.fileRepository.findBy({ tenantId, active: true });
     return files.map(fileMapper);
   }
 
@@ -52,5 +79,15 @@ export class DbDataService implements DataService {
       this.logger.error(e);
       return null;
     }
+  }
+
+  async getInactiveFiles() {
+    const files = await this.fileRepository.findBy({ active: false });
+    return files;
+  }
+
+  async deleteInactiveFiles() {
+    const files = await this.fileRepository.findBy({ active: false });
+    await this.fileRepository.remove(files);
   }
 }
