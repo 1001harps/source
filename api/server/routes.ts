@@ -1,12 +1,21 @@
 import { Request, Response } from "express";
 import { Dependencies } from "../types";
 import { AppLocals, UploadedFile } from "./types";
+import { Guard } from "../guard";
 
 export const getFileHandler =
-  ({ dataService, storageService }: Dependencies) =>
+  ({ dataService, storageService, logger }: Dependencies) =>
   async (req: Request, res: Response) => {
     const tenantId = res.locals.tenantId;
     const fileId = req.params.id;
+
+    try {
+      Guard.isDefined("fileId", fileId);
+      Guard.isUuid("value", fileId);
+    } catch (e) {
+      res.status(400).send("file id required");
+      return;
+    }
 
     const file = await dataService.getFile(tenantId, fileId);
     const url = await storageService.getUrl(file.path);
@@ -19,11 +28,15 @@ export const getFileHandler =
 export const deleteFileHandler =
   ({ dataService }: Dependencies) =>
   async (req: Request, res: Response) => {
-    console.log("delete file!");
     const tenantId = res.locals.tenantId;
     const fileId = req.params.id;
 
-    console.log({ tenantId, fileId });
+    if (!fileId) {
+      res.sendStatus(400);
+      res.end();
+      return;
+    }
+
     await dataService.setFileInactive(tenantId, fileId);
 
     res.status(200);

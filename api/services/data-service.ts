@@ -2,6 +2,7 @@ import { DataSource, Repository } from "typeorm";
 import { File } from "../db/entity/File";
 import { Tenant } from "../db/entity/Tenant";
 import { Logger } from "winston";
+import { Guard } from "../guard";
 
 export interface FileDto {
   id: string;
@@ -36,22 +37,26 @@ export class DbDataService implements DataService {
   }
 
   async getFile(tenantId: string, fileId: string): Promise<FileDto> {
+    Guard.isDefined("tenantId", tenantId);
+    Guard.isDefined("fileId", fileId);
+
+    if (fileId === undefined) throw "no file id";
+
     const file = await this.fileRepository.findOneBy({
       tenantId,
       id: fileId,
       active: true,
     });
+
     return fileMapper(file);
   }
 
   async setFileInactive(tenantId: string, fileId: string): Promise<void> {
-    console.log("setFileInactive", { tenantId, fileId });
     const file = await this.fileRepository.findOneBy({ tenantId, id: fileId });
 
     file.active = false;
 
     await this.fileRepository.save(file);
-    console.log("saved");
   }
 
   async deleteFile(tenantId: string, fileId: string): Promise<void> {
