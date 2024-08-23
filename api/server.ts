@@ -7,6 +7,7 @@ import { apiKeyMiddleware, requestLoggerMiddleware } from "./server/middleware";
 import { getFilesHandler, putFileHandler } from "./server/routes";
 import { DbDataService } from "./services/data-service";
 import { SuperbaseStorageService } from "./services/storage-service";
+import cors from "cors";
 
 const start = async () => {
   const logger = winston.createLogger({
@@ -25,6 +26,8 @@ const start = async () => {
   const app: Express = express();
   const port = process.env.PORT;
 
+  app.options("*", cors());
+  app.use(cors());
   app.use(requestLoggerMiddleware(deps));
   app.use(fileUpload());
   app.use(apiKeyMiddleware(deps));
