@@ -1,12 +1,10 @@
 import { Button, Input, Stack } from "@chakra-ui/react";
 import { ChangeEvent, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import * as tus from "tus-js-client";
 
 export const FileUpload = () => {
   const [error, setError] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const navigate = useNavigate();
 
   const handleUpload = async (e: ChangeEvent<HTMLFormElement>) => {
     e.preventDefault();

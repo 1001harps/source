@@ -28,7 +28,6 @@ export const initServer = (deps: Dependencies) => {
       format: winston.format.combine(winston.format.json()),
     })
   );
-
   app.post("/internal/tusd/webhook", postTusdWebhook(deps));
 
   app.use(apiKeyMiddleware(deps));
