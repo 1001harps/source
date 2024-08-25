@@ -1,7 +1,7 @@
 import { Button, Input, Stack } from "@chakra-ui/react";
 import { ChangeEvent, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { uploadFile } from "../../api";
+import * as tus from "tus-js-client";
 
 export const FileUpload = () => {
   const [error, setError] = useState(false);
@@ -20,15 +20,23 @@ export const FileUpload = () => {
 
     const file = e.target.file.files[0];
 
-    try {
-      const uploadedFile = await uploadFile(file);
-      navigate(`/file/${uploadedFile.id}`);
-    } catch (error) {
-      console.error(error);
-      setError(true);
-    }
+    var upload = new tus.Upload(file, {
+      endpoint: "http://localhost:8080/files/",
+      headers: {
+        "X-API-KEY": import.meta.env.VITE_SOURCE_API_KEY,
+      },
+      onError: function (error) {
+        console.log("faile: " + error);
+        setError(true);
+        setUploading(false);
+      },
+      onSuccess: function () {
+        console.log("success", file);
+        setUploading(false);
+      },
+    });
 
-    setUploading(false);
+    upload.start();
   };
 
   if (error) {

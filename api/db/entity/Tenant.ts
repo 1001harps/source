@@ -1,3 +1,6 @@
+// TODO: figure out issue with typeorm and strict mode
+// @ts-nocheck
+
 import {
   BaseEntity,
   Column,

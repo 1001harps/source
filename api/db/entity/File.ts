@@ -1,3 +1,6 @@
+// TODO: figure out issue with typeorm and strict mode
+// @ts-nocheck
+
 import {
   BaseEntity,
   Column,
@@ -21,8 +24,11 @@ export class File extends BaseEntity {
   @UpdateDateColumn()
   modified: Date;
 
-  @Column("boolean", { default: true })
+  @Column("boolean", { default: false })
   active: boolean;
+
+  @Column("boolean", { default: false })
+  deleted: boolean;
 
   path = () => `${this.tenantId}/${this.id}.mp3`;
 }

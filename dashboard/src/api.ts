@@ -11,7 +11,7 @@ const headers = {
 };
 
 export const getFile = async (id: string): Promise<FileDto> => {
-  const res = await fetch(`${API_BASE_URL}/file/${id}`, {
+  const res = await fetch(`${API_BASE_URL}/files/${id}`, {
     headers,
   });
 
@@ -26,21 +26,8 @@ export const getFiles = async (): Promise<FileDto[]> => {
   return res.json();
 };
 
-export const uploadFile = async (file: File): Promise<FileDto> => {
-  const formData = new FormData();
-  formData.append("file", file);
-
-  const res = await fetch(`${API_BASE_URL}/file`, {
-    method: "PUT",
-    body: formData,
-    headers,
-  });
-
-  return res.json();
-};
-
 export const deleteFile = async (id: string) => {
-  await fetch(`${API_BASE_URL}/file/${id}`, {
+  await fetch(`${API_BASE_URL}/files/${id}`, {
     method: "DELETE",
     headers,
   });

@@ -1,8 +1,11 @@
 import { DataSource } from "typeorm";
-import { File } from "./entity/File";
-import { Tenant } from "./entity/Tenant";
+import { File, Tenant } from "./entity";
 
-export const createDataSource = (host: string, username: string, password) => {
+export const createDataSource = (
+  host: string,
+  username: string,
+  password: string
+) => {
   return new DataSource({
     type: "postgres",
     host,

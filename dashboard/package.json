@@ -16,7 +16,8 @@
     "framer-motion": "^11.3.29",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-router-dom": "^6.26.1"
+    "react-router-dom": "^6.26.1",
+    "tus-js-client": "^4.1.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.0",
