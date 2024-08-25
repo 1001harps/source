@@ -45,7 +45,12 @@ const start = async () => {
     level: "info",
   });
 
-  const dataSource = createDataSource(process.env.DB_CONNECTION_STRING);
+  const dataSource = createDataSource(
+    process.env.POSTGRES_HOST,
+    process.env.POSTGRES_USER,
+    process.env.POSTGRES_PASSWORD
+  );
+
   await dataSource.initialize();
   await dataSource.synchronize();
 
