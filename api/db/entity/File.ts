@@ -6,9 +6,11 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
+import { Tenant } from "./Tenant";
 
 @Entity()
 export class File extends BaseEntity {
@@ -17,6 +19,9 @@ export class File extends BaseEntity {
 
   @Column("uuid")
   tenantId: string;
+
+  @ManyToOne(() => Tenant, (tenant) => tenant.files)
+  tenant: Tenant;
 
   @CreateDateColumn()
   created: Date;

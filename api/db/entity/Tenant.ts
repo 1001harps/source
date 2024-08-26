@@ -7,9 +7,11 @@ import {
   CreateDateColumn,
   Entity,
   Generated,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
+import { File } from "./File";
 
 @Entity()
 export class Tenant extends BaseEntity {
@@ -25,6 +27,9 @@ export class Tenant extends BaseEntity {
     unique: true,
   })
   name: string;
+
+  @OneToMany(() => File, (file) => file.tenantId)
+  files: File[];
 
   @CreateDateColumn()
   created: Date;

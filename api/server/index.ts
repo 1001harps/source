@@ -5,7 +5,6 @@ import {
   getFileHandler,
   getFilesHandler,
 } from "./handlers/files";
-import { postTusdWebhook } from "./handlers/internal/tusd";
 import cors, { CorsOptions } from "cors";
 import expressWinston from "express-winston";
 import winston from "winston";
@@ -28,7 +27,6 @@ export const initServer = (deps: Dependencies) => {
       format: winston.format.combine(winston.format.json()),
     })
   );
-  app.post("/internal/tusd/webhook", postTusdWebhook(deps));
 
   app.use(apiKeyMiddleware(deps));
 
