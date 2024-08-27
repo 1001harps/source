@@ -35,5 +35,8 @@ export class File extends BaseEntity {
   @Column("boolean", { default: false })
   deleted: boolean;
 
+  @Column("boolean", { default: false })
+  uploadError: boolean;
+
   path = () => `${this.tenantId}/${this.id}.mp3`;
 }

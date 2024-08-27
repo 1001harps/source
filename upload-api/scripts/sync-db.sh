@@ -1,0 +1,1 @@
+sqlboiler psql --wipe --output=pkg/models

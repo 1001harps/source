@@ -23,47 +23,52 @@ import (
 
 // File is an object representing the database table.
 type File struct {
-	ID       string    `boil:"id" json:"id" toml:"id" yaml:"id"`
-	TenantId string    `boil:"tenantId" json:"tenantId" toml:"tenantId" yaml:"tenantId"`
-	Created  time.Time `boil:"created" json:"created" toml:"created" yaml:"created"`
-	Modified time.Time `boil:"modified" json:"modified" toml:"modified" yaml:"modified"`
-	Active   bool      `boil:"active" json:"active" toml:"active" yaml:"active"`
-	Deleted  bool      `boil:"deleted" json:"deleted" toml:"deleted" yaml:"deleted"`
+	ID          string    `boil:"id" json:"id" toml:"id" yaml:"id"`
+	TenantId    string    `boil:"tenantId" json:"tenantId" toml:"tenantId" yaml:"tenantId"`
+	Created     time.Time `boil:"created" json:"created" toml:"created" yaml:"created"`
+	Modified    time.Time `boil:"modified" json:"modified" toml:"modified" yaml:"modified"`
+	Active      bool      `boil:"active" json:"active" toml:"active" yaml:"active"`
+	Deleted     bool      `boil:"deleted" json:"deleted" toml:"deleted" yaml:"deleted"`
+	UploadError bool      `boil:"uploadError" json:"uploadError" toml:"uploadError" yaml:"uploadError"`
 
 	R *fileR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L fileL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
 var FileColumns = struct {
-	ID       string
-	TenantId string
-	Created  string
-	Modified string
-	Active   string
-	Deleted  string
+	ID          string
+	TenantId    string
+	Created     string
+	Modified    string
+	Active      string
+	Deleted     string
+	UploadError string
 }{
-	ID:       "id",
-	TenantId: "tenantId",
-	Created:  "created",
-	Modified: "modified",
-	Active:   "active",
-	Deleted:  "deleted",
+	ID:          "id",
+	TenantId:    "tenantId",
+	Created:     "created",
+	Modified:    "modified",
+	Active:      "active",
+	Deleted:     "deleted",
+	UploadError: "uploadError",
 }
 
 var FileTableColumns = struct {
-	ID       string
-	TenantId string
-	Created  string
-	Modified string
-	Active   string
-	Deleted  string
+	ID          string
+	TenantId    string
+	Created     string
+	Modified    string
+	Active      string
+	Deleted     string
+	UploadError string
 }{
-	ID:       "file.id",
-	TenantId: "file.tenantId",
-	Created:  "file.created",
-	Modified: "file.modified",
-	Active:   "file.active",
-	Deleted:  "file.deleted",
+	ID:          "file.id",
+	TenantId:    "file.tenantId",
+	Created:     "file.created",
+	Modified:    "file.modified",
+	Active:      "file.active",
+	Deleted:     "file.deleted",
+	UploadError: "file.uploadError",
 }
 
 // Generated where
@@ -126,19 +131,21 @@ func (w whereHelperbool) GT(x bool) qm.QueryMod  { return qmhelper.Where(w.field
 func (w whereHelperbool) GTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
 
 var FileWhere = struct {
-	ID       whereHelperstring
-	TenantId whereHelperstring
-	Created  whereHelpertime_Time
-	Modified whereHelpertime_Time
-	Active   whereHelperbool
-	Deleted  whereHelperbool
+	ID          whereHelperstring
+	TenantId    whereHelperstring
+	Created     whereHelpertime_Time
+	Modified    whereHelpertime_Time
+	Active      whereHelperbool
+	Deleted     whereHelperbool
+	UploadError whereHelperbool
 }{
-	ID:       whereHelperstring{field: "\"file\".\"id\""},
-	TenantId: whereHelperstring{field: "\"file\".\"tenantId\""},
-	Created:  whereHelpertime_Time{field: "\"file\".\"created\""},
-	Modified: whereHelpertime_Time{field: "\"file\".\"modified\""},
-	Active:   whereHelperbool{field: "\"file\".\"active\""},
-	Deleted:  whereHelperbool{field: "\"file\".\"deleted\""},
+	ID:          whereHelperstring{field: "\"file\".\"id\""},
+	TenantId:    whereHelperstring{field: "\"file\".\"tenantId\""},
+	Created:     whereHelpertime_Time{field: "\"file\".\"created\""},
+	Modified:    whereHelpertime_Time{field: "\"file\".\"modified\""},
+	Active:      whereHelperbool{field: "\"file\".\"active\""},
+	Deleted:     whereHelperbool{field: "\"file\".\"deleted\""},
+	UploadError: whereHelperbool{field: "\"file\".\"uploadError\""},
 }
 
 // FileRels is where relationship names are stored.
@@ -169,9 +176,9 @@ func (r *fileR) GetTenantIdTenant() *Tenant {
 type fileL struct{}
 
 var (
-	fileAllColumns            = []string{"id", "tenantId", "created", "modified", "active", "deleted"}
+	fileAllColumns            = []string{"id", "tenantId", "created", "modified", "active", "deleted", "uploadError"}
 	fileColumnsWithoutDefault = []string{"tenantId"}
-	fileColumnsWithDefault    = []string{"id", "created", "modified", "active", "deleted"}
+	fileColumnsWithDefault    = []string{"id", "created", "modified", "active", "deleted", "uploadError"}
 	filePrimaryKeyColumns     = []string{"id"}
 	fileGeneratedColumns      = []string{}
 )
