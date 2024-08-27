@@ -4,6 +4,7 @@
   "main": "server.ts",
   "scripts": {
     "start": "tsx app.ts",
+    "start-dev": "tsx app.ts --watch",
     "test": "jest"
   },
   "author": "",
