@@ -89,7 +89,7 @@ func (svc *HookHandlerService) InvokeHook(r *http.Request) *hooks.HookResponse {
 	}
 
 	switch req.Type {
-	case "pre-create":
+	case hooks.HookPreCreate:
 		file, err := svc.dataService.CreateFile(tenant.ID)
 		if err != nil {
 			return hooksResponseInternalServerError()
@@ -104,7 +104,7 @@ func (svc *HookHandlerService) InvokeHook(r *http.Request) *hooks.HookResponse {
 
 		return hookResponseOk(fileInfo)
 
-	case "post-finish":
+	case hooks.HookPostFinish:
 		{
 			fileId, exists := req.Event.Upload.MetaData["id"]
 			if !exists || fileId == "" {
@@ -138,37 +138,26 @@ func (svc *HookHandlerService) InvokeHook(r *http.Request) *hooks.HookResponse {
 				return hooksResponseInternalServerError()
 			}
 
-			file.Active = true
-
-			err = svc.dataService.UpdateFile(file)
+			err = svc.dataService.SetFileActive(tenant.ID, file.ID)
 			if err != nil {
-				svc.logger.Error("failed to update file", zap.Error(err))
+				svc.logger.Error("failed to set file active", zap.Error(err))
 				return hooksResponseInternalServerError()
 			}
-
 			break
 		}
 
-	case "post-terminate":
+	case hooks.HookPostTerminate:
 		{
 			fileId, exists := req.Event.Upload.MetaData["id"]
 			if !exists || fileId == "" {
 				return hookResponseBadRequest()
 			}
 
-			file, err := svc.dataService.GetFile(tenant.ID, fileId)
-			if err != nil || file == nil {
+			err = svc.dataService.SetFileUploadCancelled(tenant.ID, fileId)
+			if err != nil {
+				svc.logger.Error("failed to set file upload cancelled", zap.Error(err))
 				return hookResponseBadRequest()
 			}
-
-			file.Active = false
-			file.Deleted = true
-
-			err = svc.dataService.UpdateFile(file)
-			if err != nil {
-				return hooksResponseInternalServerError()
-			}
-
 			break
 		}
 
@@ -180,7 +169,6 @@ func (svc *HookHandlerService) InvokeHook(r *http.Request) *hooks.HookResponse {
 }
 
 func NewHookHandlerService(logger *zap.Logger, dataService *DataService, storageService *StorageService) *HookHandlerService {
-
 	return &HookHandlerService{
 		logger:         logger,
 		dataService:    dataService,
