@@ -38,6 +38,10 @@ func (svc *DataService) GetFile(tenantId string, id string) (*models.File, error
 }
 
 func (svc *DataService) UpdateFile(file *models.File) error {
-	_, err := file.Update(*svc.ctx, svc.db, boil.Infer())
+	rowsAffected, err := file.Update(*svc.ctx, svc.db, boil.Infer())
+	if rowsAffected == 0 {
+		return sql.ErrNoRows
+	}
+
 	return err
 }

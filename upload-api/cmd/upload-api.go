@@ -3,29 +3,29 @@ package main
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"log"
-	"net"
+	"net/http"
 	"os"
 
-	pb "github.com/1001harps/source/upload-api/pkg/hooks/grpc/proto"
-	"github.com/1001harps/source/upload-api/pkg/server"
 	"github.com/1001harps/source/upload-api/pkg/service"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/middleware"
 	_ "github.com/joho/godotenv/autoload"
 	_ "github.com/lib/pq"
 	"github.com/volatiletech/sqlboiler/boil"
 	"go.uber.org/zap"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
-	"google.golang.org/grpc/reflection"
 )
 
 func initStorage() *s3.S3 {
 	s3session, err := session.NewSession(&aws.Config{
 		Region: aws.String(os.Getenv("AWS_DEFAULT_REGION")),
+		// LogLevel: aws.LogLevel(aws.LogDebugWithHTTPBody),
+		// Logger:   aws.NewDefaultLogger(),
 	})
 	if err != nil {
 		log.Fatal(err)
@@ -62,29 +62,34 @@ func main() {
 
 	ctx := context.Background()
 
+	bucket := os.Getenv("S3_BUCKET")
+	if bucket == "" {
+		logger.Fatal("S3_BUCKET is not set")
+	}
+
 	s3svc := initStorage()
-	storageService := service.NewStorageService(service.NewStorageServiceConfig(os.Getenv("S3_BUCKET")), logger, s3svc)
+	storageService := service.NewStorageService(service.NewStorageServiceConfig(bucket), logger, s3svc)
 
 	db := initDB()
 	dataService := service.NewDataService(&ctx, db, logger)
 
 	port := os.Getenv("PORT")
 
-	lis, err := net.Listen("tcp", fmt.Sprintf("localhost:%s", port))
-	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
-	}
+	handler := service.NewHookHandlerService(logger, dataService, storageService)
 
-	creds := insecure.NewCredentials()
-	opts := []grpc.ServerOption{grpc.Creds(creds)}
+	r := chi.NewRouter()
+	r.Use(middleware.Logger)
+	r.Post("/", func(w http.ResponseWriter, r *http.Request) {
+		res := handler.InvokeHook(r)
+		body, err := json.Marshal(res)
+		if err != nil {
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
 
-	grpcServer := grpc.NewServer(opts...)
-	pb.RegisterHookHandlerServer(grpcServer, server.NewServer(logger, dataService, storageService))
-	reflection.Register(grpcServer)
-
-	logger.Info(fmt.Sprintf("server listening on port %s", port))
-	if err := grpcServer.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
-	}
-
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(body)
+	})
+	logger.Info("starting server on port " + port)
+	http.ListenAndServe(fmt.Sprintf(":%s", port), r)
 }

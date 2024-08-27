@@ -12,17 +12,30 @@ services:
     env_file: "s3.env"
     environment:
       PORT: "4001"
+  upload-api:
+    image: source-upload-api/local
+    ports:
+      - "5001:5001"
+    expose:
+      - 5001
+    env_file:
+      - path: "s3.env"
+      - path: "pg.env"
+    environment:
+      PORT: "5001"
+      S3_BUCKET: "sourcedev"
   tusd:
     image: tusproject/tusd:latest
     ports:
       - "8080:8080"
     env_file: "s3.env"
-
+    depends_on:
+      - upload-api
     command:
       [
         -s3-bucket=sourcedev,
         -s3-object-prefix=tusd,
-        -hooks-http=http://api:4001/internal/tusd/webhook,
+        -hooks-http=http://upload-api:5001,
         -cors-allow-origin=http://localhost:4000,
         -cors-allow-headers=X-API-KEY,
       ]

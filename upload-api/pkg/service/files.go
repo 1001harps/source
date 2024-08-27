@@ -26,23 +26,28 @@ func NewStorageService(config *StorageServiceConfig, logger *zap.Logger, s3svc *
 	return &StorageService{config, logger, s3svc}
 }
 
-func (svc *StorageService) MoveFile(path string, newPath string) error {
-	_, err := svc.s3svc.CopyObject(&s3.CopyObjectInput{
-		Bucket:     aws.String(svc.config.Bucket),
-		CopySource: aws.String(fmt.Sprintf("%s/%s", svc.config.Bucket, path)),
-		Key:        aws.String(newPath),
-	})
-	if err != nil {
-		return err
-	}
-
-	_, err = svc.s3svc.DeleteObject(&s3.DeleteObjectInput{
+func (svc *StorageService) DeleteFile(path string) error {
+	_, err := svc.s3svc.DeleteObject(&s3.DeleteObjectInput{
 		Bucket: aws.String(svc.config.Bucket),
-		Key:    aws.String(newPath),
+		Key:    aws.String(path),
+	})
+	return err
+}
+
+func (svc *StorageService) MoveFile(source string, destination string, contentType string) error {
+	svc.logger.Info("MoveFile ", zap.String("bucket", svc.config.Bucket), zap.String("source", source), zap.String("destination", destination))
+
+	sourcePath := fmt.Sprintf("%s/%s", svc.config.Bucket, source)
+
+	_, err := svc.s3svc.CopyObject(&s3.CopyObjectInput{
+		Bucket:      aws.String(svc.config.Bucket),
+		CopySource:  aws.String(sourcePath),
+		Key:         aws.String(destination),
+		ContentType: aws.String(contentType),
 	})
 	if err != nil {
 		return err
 	}
 
-	return nil
+	return svc.DeleteFile(source)
 }
