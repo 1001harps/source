@@ -31,7 +31,7 @@ export const Home = () => {
           Upload
         </Button>
       </Box>
-      <TableContainer>
+      <TableContainer maxH="73vh" overflowY="scroll">
         <Table variant="simple">
           <Thead>
             <Tr>

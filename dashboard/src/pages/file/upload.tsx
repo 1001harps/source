@@ -6,6 +6,8 @@ export const FileUpload = () => {
   const [error, setError] = useState(false);
   const [uploading, setUploading] = useState(false);
 
+  const [uploadPercent, setUploadPercent] = useState(0);
+
   const handleUpload = async (e: ChangeEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -15,6 +17,7 @@ export const FileUpload = () => {
 
     setUploading(true);
     setError(false);
+    setUploadPercent(0);
 
     const file = e.target.file.files[0];
 
@@ -27,6 +30,10 @@ export const FileUpload = () => {
         console.log("faile: " + error);
         setError(true);
         setUploading(false);
+      },
+      onProgress(bytesUploaded: number, bytesTotal: number) {
+        const percent = Math.floor((bytesUploaded / bytesTotal) * 100);
+        setUploadPercent(percent);
       },
       onSuccess: function () {
         console.log("success", file);
@@ -53,7 +60,7 @@ export const FileUpload = () => {
           name="file"
         />
         <Button type="submit" disabled={uploading}>
-          {uploading ? "uploading" : "upload"}
+          {uploading ? `uploading: ${uploadPercent}%` : "upload"}
         </Button>
       </Stack>
     </form>
