@@ -22,7 +22,7 @@ export const FileUpload = () => {
     const file = e.target.file.files[0];
 
     var upload = new tus.Upload(file, {
-      endpoint: "http://localhost:8080/files/",
+      endpoint: `${import.meta.env.VITE_UPLOAD_BASE_URL}/files/`,
       headers: {
         "X-API-KEY": import.meta.env.VITE_SOURCE_API_KEY,
       },
