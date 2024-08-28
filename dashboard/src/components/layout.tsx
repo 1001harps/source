@@ -1,4 +1,4 @@
-import { Box, Stack, Text } from "@chakra-ui/react";
+import { Box, Button, Stack, Text } from "@chakra-ui/react";
 import { Player } from "./player";
 
 export interface LayoutProps {
@@ -6,6 +6,8 @@ export interface LayoutProps {
 }
 
 export const Layout = ({ children }: LayoutProps) => {
+  const onLogoutClick = async () => {};
+
   return (
     <Stack h="100vh" align="center">
       <Box
@@ -23,6 +25,10 @@ export const Layout = ({ children }: LayoutProps) => {
             source dashboard
           </Text>
         </Box>
+
+        <Button onClick={onLogoutClick} ml="auto">
+          logout
+        </Button>
       </Box>
 
       <Box as="main" h="100%" p="16px" maxW="760px" w="100%">

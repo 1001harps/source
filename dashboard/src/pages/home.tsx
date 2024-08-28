@@ -1,70 +1,48 @@
-import {
-  Box,
-  Button,
-  TableContainer,
-  Table,
-  Thead,
-  Tr,
-  Th,
-  Tbody,
-  Td,
-  Link,
-} from "@chakra-ui/react";
-import { useState, useContext, useEffect } from "react";
-import { Link as RouterLink } from "react-router-dom";
-import { PlayerContext } from "../components/player";
-import { FileDto, getFiles } from "../api";
+import { Box, Button, Input } from "@chakra-ui/react";
+import { useState } from "react";
 
 export const Home = () => {
-  const [files, setFiles] = useState<FileDto[]>([]);
+  const [emailInput, setEmailInput] = useState("");
+  const [passwordInput, setPasswordInput] = useState("");
 
-  const { play } = useContext(PlayerContext);
+  const onSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
+    e.preventDefault();
 
-  useEffect(() => {
-    getFiles().then(setFiles);
-  }, []);
+    const body = new FormData();
+    body.append("email", emailInput);
+    body.append("password", passwordInput);
+
+    console.log(body);
+
+    setEmailInput("");
+    setPasswordInput("");
+  };
 
   return (
     <Box>
-      <Box mb="16px">
-        <Button w="100%" colorScheme="blue" as={RouterLink} to="/file/upload">
-          Upload
-        </Button>
-      </Box>
-      <TableContainer maxH="73vh" overflowY="scroll">
-        <Table variant="simple">
-          <Thead>
-            <Tr>
-              <Th>id</Th>
-              <Th>created</Th>
-            </Tr>
-          </Thead>
+      <form onSubmit={onSubmit}>
+        <label>
+          email
+          <Input
+            value={emailInput}
+            onChange={(e) => setEmailInput(e.target.value)}
+            type="text"
+            name="email"
+          />
+        </label>
 
-          <Tbody>
-            {files.map((f) => (
-              <Tr key={f.id}>
-                <Td>
-                  <Link as={RouterLink} to={`/file/${f.id}`}>
-                    {f.id}
-                  </Link>
-                </Td>
-                <Td>{f.created.toString()}</Td>
-                <Td>
-                  <Button
-                    onClick={() => {
-                      play(f.url as string);
-                    }}
-                    size="xs"
-                    colorScheme="green"
-                  >
-                    play
-                  </Button>
-                </Td>
-              </Tr>
-            ))}
-          </Tbody>
-        </Table>
-      </TableContainer>
+        <label>
+          password
+          <Input
+            value={passwordInput}
+            onChange={(e) => setPasswordInput(e.target.value)}
+            type="password"
+            name="email"
+          />
+        </label>
+
+        <Button type="submit">submit</Button>
+      </form>
     </Box>
   );
 };
