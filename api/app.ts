@@ -3,14 +3,7 @@ import "dotenv/config";
 import winston from "winston";
 import { createDataSource } from "./db/data-source";
 import { initServer } from "./server";
-import {
-  StorageConfigSchema,
-  StorageService,
-} from "./services/storage-service";
-import {
-  CloudFrontUrlSigningService,
-  UrlSigningServiceConfigSchema,
-} from "./services/url-signing-service";
+import { S3UrlSigningService } from "./services/url-signing-service";
 
 const start = async () => {
   const logger = winston.createLogger({
@@ -19,41 +12,25 @@ const start = async () => {
     level: "info",
   });
 
-  const dataSource = createDataSource(
-    process.env.POSTGRES_HOST!,
-    process.env.POSTGRES_USER!,
-    process.env.POSTGRES_PASSWORD!
-  );
+  const dataSource = createDataSource(process.env.POSTGRES_CONNECTION_STRING!);
 
   await dataSource.initialize();
   await dataSource.synchronize();
 
-  const s3Client = new AWS.S3({ region: process.env.AWS_REGION });
+  const s3Client = new AWS.S3({
+    region: process.env.AWS_REGION,
+    endpoint: process.env.AWS_S3_ENDPOINT,
+  });
 
-  const storageConfig = {
-    bucket: process.env.AWS_S3_BUCKET,
-  };
-
-  const urlSigningConfig = {
-    baseUrl: process.env.CLOUDFRONT_BASE_URL,
-    keyPairId: process.env.CLOUDFRONT_KEYPAIR_ID,
-    privateKey: process.env.CLOUDFRONT_PRIVATE_KEY,
-  };
-
-  const signingService = new CloudFrontUrlSigningService(
-    UrlSigningServiceConfigSchema.parse(urlSigningConfig)
-  );
-
-  const storageService = new StorageService(
+  const urlSigningService = new S3UrlSigningService(
     s3Client,
-    signingService,
-    StorageConfigSchema.parse(storageConfig)
+    process.env.AWS_S3_BUCKET!
   );
 
   const deps = {
     logger,
     dataSource,
-    storageService,
+    urlSigningService,
   };
 
   const port = process.env.PORT;
