@@ -7,6 +7,10 @@ import {
   StorageConfigSchema,
   StorageService,
 } from "./services/storage-service";
+import {
+  CloudFrontUrlSigningService,
+  UrlSigningServiceConfigSchema,
+} from "./services/url-signing-service";
 
 const start = async () => {
   const logger = winston.createLogger({
@@ -28,15 +32,21 @@ const start = async () => {
 
   const storageConfig = {
     bucket: process.env.AWS_S3_BUCKET,
-    cloudfront: {
-      baseUrl: process.env.CLOUDFRONT_BASE_URL,
-      keyPairId: process.env.CLOUDFRONT_KEYPAIR_ID,
-      privateKey: process.env.CLOUDFRONT_PRIVATE_KEY,
-    },
   };
+
+  const urlSigningConfig = {
+    baseUrl: process.env.CLOUDFRONT_BASE_URL,
+    keyPairId: process.env.CLOUDFRONT_KEYPAIR_ID,
+    privateKey: process.env.CLOUDFRONT_PRIVATE_KEY,
+  };
+
+  const signingService = new CloudFrontUrlSigningService(
+    UrlSigningServiceConfigSchema.parse(urlSigningConfig)
+  );
 
   const storageService = new StorageService(
     s3Client,
+    signingService,
     StorageConfigSchema.parse(storageConfig)
   );
 

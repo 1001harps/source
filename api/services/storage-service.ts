@@ -1,14 +1,9 @@
 import * as AWS from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/cloudfront-signer";
 import { z } from "zod";
+import { UrlSigningService } from "./url-signing-service";
 
 export const StorageConfigSchema = z.object({
   bucket: z.string(),
-  cloudfront: z.object({
-    baseUrl: z.string(),
-    keyPairId: z.string(),
-    privateKey: z.string(),
-  }),
 });
 
 export type StorageConfig = z.infer<typeof StorageConfigSchema>;
@@ -16,28 +11,20 @@ export type StorageConfig = z.infer<typeof StorageConfigSchema>;
 export class StorageService {
   config: StorageConfig;
   client: AWS.S3;
+  urlSigningService: UrlSigningService;
 
-  constructor(client: AWS.S3, config: StorageConfig) {
+  constructor(
+    client: AWS.S3,
+    urlSigningService: UrlSigningService,
+    config: StorageConfig
+  ) {
     this.client = client;
+    this.urlSigningService = urlSigningService;
     this.config = config;
   }
 
   async getUrl(path: string, expires: Date): Promise<string> {
-    const { baseUrl, keyPairId, privateKey } = this.config.cloudfront;
-    // "2026-01-01",
-
-    const url = `${baseUrl}/${path}`;
-
-    const dateLessThan = expires.toString();
-
-    const signedUrl = getSignedUrl({
-      keyPairId,
-      privateKey,
-      url,
-      dateLessThan,
-    });
-
-    return signedUrl;
+    return this.urlSigningService.getUrl(path, expires);
   }
 
   async move(path: string, newPath: string): Promise<void> {
