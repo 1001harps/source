@@ -5,12 +5,3 @@ source.localhost {
 api.source.localhost {
     reverse_proxy localhost:4001
 }
-
-upload.source.localhost {
-    reverse_proxy localhost:8080 {
-        request_buffers 0
-        response_buffers 0
-        flush_interval -1
-    }
-}
-
