@@ -12,7 +12,7 @@ jobs:
   docker_publish:
     strategy:
       matrix:
-        app: ["api", "dashboard", "upload-api"]
+        app: ["api", "dashboard"]
     runs-on: ubuntu-latest
     permissions:
       packages: write
