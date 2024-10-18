@@ -4,7 +4,7 @@ import { Dependencies } from "../../../types";
 import { fileMapper } from "./types";
 
 export const getFilesHandler =
-  ({ dataSource, storageService }: Dependencies) =>
+  ({ dataSource, urlSigningService }: Dependencies) =>
   async (req: Request, res: Response) => {
     const tenantId = res.locals.tenantId;
 
@@ -21,7 +21,7 @@ export const getFilesHandler =
 
     // TODO: is there a way to sign in bulk?
     for (const dto of dtos) {
-      dto.url = await storageService.getUrl(dto.path, expiry);
+      dto.url = await urlSigningService.getUrl(dto.path, expiry);
     }
 
     res.json(dtos);

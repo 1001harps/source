@@ -1,10 +1,10 @@
 import * as AWS from "@aws-sdk/client-s3";
 import { DataSource } from "typeorm";
 import { Logger } from "winston";
-import { StorageService } from "./services/storage-service";
+import { UrlSigningService } from "./services/url-signing-service";
 
 export interface Dependencies {
   logger: Logger;
   dataSource: DataSource;
-  storageService: StorageService;
+  urlSigningService: UrlSigningService;
 }

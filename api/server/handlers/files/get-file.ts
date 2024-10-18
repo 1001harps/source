@@ -1,12 +1,10 @@
-import { Router } from "express";
 import { Request, Response } from "express";
-import { Dependencies } from "../../../types";
-import { AppLocals, UploadedFile } from "../../types";
 import { File } from "../../../db/entity/File";
+import { Dependencies } from "../../../types";
 import { fileMapper } from "./types";
 
 export const getFileHandler =
-  ({ dataSource, storageService }: Dependencies) =>
+  ({ dataSource, urlSigningService }: Dependencies) =>
   async (req: Request, res: Response) => {
     const tenantId = res.locals.tenantId;
     const fileId = req.params.id;
@@ -30,7 +28,7 @@ export const getFileHandler =
     }
 
     const expiry = new Date(Date.now() + 1000 * 60);
-    const url = await storageService.getUrl(file.path(), expiry);
+    const url = await urlSigningService.getUrl(file.path(), expiry);
 
     const dto = fileMapper(file);
     dto.url = url;
